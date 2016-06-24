@@ -17,7 +17,7 @@
 
   script:
     - echo "PR ${TRAVIS_PULL_REQUEST} and TAG ${TRAVIS_TAG}"
-    - mvn clean verify
+    - mvn clean verify -DskipTests=true
 
   after_success:
     - /bin/bash travis/deploy.bash
