@@ -15,6 +15,10 @@
   # build steps
   install: true
 
+  before_script:
+    - which python
+
+
   script:
     - echo "PR ${TRAVIS_PULL_REQUEST} and TAG ${TRAVIS_TAG}"
     - mvn verify -DskipTests=true
