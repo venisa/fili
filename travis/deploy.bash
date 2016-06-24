@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 PUBLISH_WHITELIST="master foo"
 
 # We only publish on commits to whitelisted branches, not PRs against them or tagging events
@@ -14,7 +14,7 @@ if [[ "${TRAVIS_TAG}" != "" ]]; then
 fi
 
 
-if [[ ${PUBLISH_WHITELIST} =~ ${TRAVIS_BRANCH} ]]; then
+if [[ ! ${PUBLISH_WHITELIST} =~ ${TRAVIS_BRANCH} ]]; then
     echo "Not publishing, ${TRAVIS_BRANCH} is not in whitelist: ${PUBLISH_WHITELIST}"
     exit 0
 fi
