@@ -20,19 +20,13 @@
   install: true
   script:
     - echo "PR ${TRAVIS_PULL_REQUEST} and TAG ${TRAVIS_TAG}"
-    - if [ "${TRAVIS_PULL_REQUEST}" = "true" ] ; then
-        mvn clean package verify -DskipTests
-        &&
-        mkdir failedTests
-        &&
-        find -name testng-failed.xml -exec cp -vf "{}" failedTests/ \; ;
-      fi
-    - if [ ! -f failedTests/testng-failed.xml && test "${TRAVIS_TAG}" != "" ] ; then
+    - mvn clean package verify -DskipTests
+
+  after_success:
+    - if [ "${TRAVIS_TAG}" != "" ] ; then
         mvn versions:set -DnewVersion=${TRAVIS_TAG}
         && mvn deploy --settings travis/bintray-settings.xml ;
       fi
-
-  after_success:
     - echo "Hello World!"
 
 #      && test "${TRAVIS_PULL_REQUEST}" == ""
