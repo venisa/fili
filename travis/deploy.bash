@@ -8,8 +8,8 @@ if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
     exit 0
 fi
 
-if [[ "${TRAVIS_TAG}" == "" ]]; then
-    echo "Not publishing, this is a tag:  ${TRAVIS_TAG}"
+if [[ "${TRAVIS_TAG}" != "" ]]; then
+    echo "Not publishing, this is a tag event: ${TRAVIS_TAG}"
     exit 0
 fi
 
