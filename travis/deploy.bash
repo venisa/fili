@@ -26,7 +26,7 @@ echo "Maven versions set : "
 mvn versions:set -DnewVersion=$(git describe)
 
 echo "Deploying: "
-mvn deploy --settings travis/bintray-settings.xml
+mvn deploy --settings travis/bintray-settings.xml -DskipTests
 
 echo "Reverting"
 mvn versions:revert
