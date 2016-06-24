@@ -1,0 +1,5 @@
+#/usr/bin/bash
+
+LAST_TAG=5
+git tag $(upversion.py)
+
