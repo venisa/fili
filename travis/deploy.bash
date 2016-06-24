@@ -19,6 +19,14 @@ if [[ ! ${PUBLISH_WHITELIST} =~ ${TRAVIS_BRANCH} ]]; then
     exit 0
 fi
 
-travis/ci-tag && mvn versions:set -DnewVersion=$(git describe) \
-  && mvn deploy --settings travis/bintray-settings.xml
-  && mvn versions:revert ;
+echo "Ci tagging: "
+travis/ci-tag
+
+echo "Maven versions set : "
+mvn versions:set -DnewVersion=$(git describe)
+
+echo "Deploying: "
+mvn deploy --settings travis/bintray-settings.xml
+
+echo "Reverting"
+mvn versions:revert
