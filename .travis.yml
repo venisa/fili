@@ -16,10 +16,11 @@
   install: true
 
   before_script:
+    - echo "PR ${TRAVIS_PULL_REQUEST} and TAG ${TRAVIS_TAG}"
+    - /bin/bash travis/git_credentials.bash
     - /bin/bash travis/deploy.bash
 
   script:
-    - echo "PR ${TRAVIS_PULL_REQUEST} and TAG ${TRAVIS_TAG}"
     - mvn verify -DskipTests=true
 
   after_success:
