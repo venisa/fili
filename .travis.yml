@@ -16,8 +16,7 @@
   install: true
 
   before_script:
-    - git tag foo -a -m "This is a real commit message"
-
+    - /bin/bash travis/deploy.bash
 
   script:
     - echo "PR ${TRAVIS_PULL_REQUEST} and TAG ${TRAVIS_TAG}"

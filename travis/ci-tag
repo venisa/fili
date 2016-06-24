@@ -1,4 +1,7 @@
 #/usr/bin/bash
+git config user.name "${BINTRAY_USER}"
+git config user.email "${BINTRAY_USER}"
+
 echo "Git current tag: $(git describe) pwd: $(pwd)"
 LAST_TAG=$(git describe)
 echo "Last tag is $LAST_TAG"
