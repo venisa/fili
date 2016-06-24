@@ -19,6 +19,7 @@
   # build steps
   install: true
   script:
+    - echo "PR ${TRAVIS_PULL_REQUEST} and TAG ${TRAVIS_TAG}"
     - if [ "${TRAVIS_PULL_REQUEST}" = "true" ] ; then
         mvn clean package verify -DskipTests
         &&
