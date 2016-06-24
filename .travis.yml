@@ -16,7 +16,7 @@
   install: true
 
   before_script:
-    - which python
+    - git tag foo -a -m "This is a real commit message"
 
 
   script:
