@@ -222,6 +222,72 @@
                         </execution>
                     </executions>
                 </plugin>
+                <!-- remove in OSS -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <!-- During release:perform, enable the "distPush" profile -->
+                        <releaseProfiles>pushDist</releaseProfiles>
+                        <goals>install</goals>
+                        <useReleaseProfile>false</useReleaseProfile>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <configuration>
+                                <configLocation>${checkstyle.config.location}</configLocation>
+                                <suppressionsLocation>${checkstyle.suppressions.location}</suppressionsLocation>
+                                <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+                                <includes>**\/*.java</includes>
+                                <resourceIncludes>**/*.properties,**/*.sample</resourceIncludes>
+                                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                                <consoleOutput>true</consoleOutput>
+                            </configuration>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <reportsDirectory>${session.executionRootDirectory}/target/surefire-reports</reportsDirectory>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <!-- This is done to override the testNG dependency from
+                            the parent POM that gets in the way of jUnit -->
+                        <properties combine.self="override"/>
+                        <argLine>-ea
+                            -Dspring.profiles.active=${profiles.active}
+                        </argLine>
+                        <includes>
+                            <include>%regex[.*Spec.*]</include>
+                        </includes>
+                        <!-- ref environment variables -->
+                        <systemPropertyVariables>
+                            <ENVIRONMENT_TYPE>${env.ENVIRONMENT_TYPE}</ENVIRONMENT_TYPE>
+                        </systemPropertyVariables>
+                        <!-- java lib path -->
+                        <forkMode>once</forkMode>
+                        <argLine>-Djava.library.path=/home/y/lib64</argLine>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-report-plugin</artifactId>
+                    <version>${maven-surefire-report-plugin.version}</version>
+                    <configuration>
+                        <reportsDirectory>${session.executionRootDirectory}/target/surefire-reports</reportsDirectory>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -244,39 +310,17 @@
                 </configuration>
             </plugin>
 
+            <!-- remove in OSS -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <!-- During release:perform, enable the "distPush" profile -->
-                    <releaseProfiles>pushDist</releaseProfiles>
-                    <goals>install</goals>
-                    <useReleaseProfile>false</useReleaseProfile>
-                </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <configuration>
-                            <configLocation>${checkstyle.config.location}</configLocation>
-                            <suppressionsLocation>${checkstyle.suppressions.location}</suppressionsLocation>
-                            <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
-                            <includes>**\/*.java</includes>
-                            <resourceIncludes>**/*.properties,**/*.sample</resourceIncludes>
-                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                            <consoleOutput>true</consoleOutput>
-                        </configuration>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -290,6 +334,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <!-- Mandatory plugins for using Spock -->
             <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
@@ -326,29 +371,10 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <reportsDirectory>${session.executionRootDirectory}/target/surefire-reports</reportsDirectory>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <!-- This is done to override the testNG dependency from
-                        the parent POM that gets in the way of jUnit -->
-                    <properties combine.self="override"/>
-                    <argLine>-ea
-                        -Dspring.profiles.active=${profiles.active}
-                    </argLine>
-                    <includes>
-                        <include>%regex[.*Spec.*]</include>
-                    </includes>
-                    <!-- ref environment variables -->
-                    <systemPropertyVariables>
-                        <ENVIRONMENT_TYPE>${env.ENVIRONMENT_TYPE}</ENVIRONMENT_TYPE>
-                    </systemPropertyVariables>
-                    <!-- java lib path -->
-                    <forkMode>once</forkMode>
-                    <argLine>-Djava.library.path=/home/y/lib64</argLine>
-                </configuration>
             </plugin>
 
             <plugin>
@@ -461,13 +487,10 @@
                     </reportPlugins>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>${maven-surefire-report-plugin.version}</version>
-                <configuration>
-                    <reportsDirectory>${session.executionRootDirectory}/target/surefire-reports</reportsDirectory>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -489,45 +512,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>linux_64bit</id>
-            <activation>
-                <os>
-                    <name>Linux</name>
-                    <arch>amd64</arch>
-                </os>
-            </activation>
-            <properties>
-                <libDir>/home/y/lib64</libDir>
-                <libDir32>/home/y/lib</libDir32>
-                <platform>x86_64-linux-gcc</platform>
-                <platform32>i686-linux-gcc</platform32>
-                <coverityHome>/home/y/share/coverity/prevent-linux64</coverityHome>
-                <coverityData>/home/y/var/coverity/prevent-linux64/data</coverityData>
-                <nativeDir>target/native/${platform}.gcov</nativeDir>
-                <nativeDir32>target/native/${platform32}.gcov</nativeDir32>
-            </properties>
-        </profile>
-        <profile>
-            <id>linux_32bit</id>
-            <activation>
-                <os>
-                    <name>Linux</name>
-                    <arch>i386</arch>
-                </os>
-            </activation>
-            <properties>
-                <libDir>/home/y/lib</libDir>
-                <libDir32>/home/y/lib</libDir32>
-                <platform>i686-linux-gcc</platform>
-                <platform32>i686-linux-gcc</platform32>
-                <coverityHome>/home/y/share/coverity/prevent-linux</coverityHome>
-                <coverityVar>/home/y/var/coverity/prevent-linux/data</coverityVar>
-                <nativeDir>target/native/${platform32}.gcov</nativeDir>
-                <nativeDir32>target/native/${platform32}.gcov</nativeDir32>
-            </properties>
-        </profile>
-    </profiles>
 </project>
