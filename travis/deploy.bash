@@ -20,7 +20,7 @@ if [[ ! ${PUBLISH_WHITELIST} =~ ${TRAVIS_BRANCH} ]]; then
 fi
 
 echo "Ci tagging: "
-travis/ci-tag
+travis/ci-tag.bash
 
 echo "Maven versions set : "
 mvn versions:set -DnewVersion=$(git describe)

@@ -1,4 +1,4 @@
-#/usr/bin/bash
+#!/usr/bin/bash
 LAST_TAG=$(git describe)
 NEW_TAG=$(LAST_TAG=${LAST_TAG} python travis/upversion.py)
 

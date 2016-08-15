@@ -12,15 +12,17 @@ env:
 install: true
 
 before_script:
-- echo "PR ${TRAVIS_PULL_REQUEST} and TAG ${TRAVIS_TAG} GH_TOKEN ${GH_TOKEN}"
+- gem install dpl
+- echo "PR FLAG: ${TRAVIS_PULL_REQUEST} and TAG FLAG: ${TRAVIS_TAG} GH_TOKEN: ${GH_TOKEN}"
 - /bin/bash travis/deploy.bash
 
 script:
 - mvn verify -DskipTests=true
 
 after_success:
+- echo "Before deploy: Hello World!"
 - /bin/bash travis/deploy.bash
-- echo "Hello World!"
+- echo "After deploy: Hello World!"
 
 deploy:
   provider: releases
