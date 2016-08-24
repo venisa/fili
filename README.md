@@ -1,5 +1,5 @@
-Fili Web Service [![Build Status](http://jenkins.screwdriver.corp.yahoo.com:9999/jenkins/buildStatus/icon?job=14494-digits_hippodrome-trunk-component)](http://jenkins.screwdriver.corp.yahoo.com:9999/jenkins/job/14494-digits_hippodrome-trunk-component/)
-==================
+Fili Web Service [![Build Status](http://https://travis-ci.org/yahoo/fili.svg?branch=master)
+============================================================================================
 
 Repository for the Fili web service.
 
