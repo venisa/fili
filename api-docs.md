@@ -56,17 +56,17 @@ All dimensions have an Id property (a natural key) and a Desc property (a human-
 fields can be used to filter rows reported on, and both of these fields are included in the data query result set for
 each dimension.
 
-Get a [list of all dimensions](https://digits3.data.yahoo.com:4443/v1/dimensions):
+Get a [list of all dimensions](https://sampleapp.fili.org/v1/dimensions):
 
-    GET https://digits3.data.yahoo.com:4443/v1/dimensions
+    GET https://sampleapp.fili.org/v1/dimensions
 
-Get a [specific dimension](https://digits3.data.yahoo.com:4443/v1/dimensions/productRegion):
+Get a [specific dimension](https://sampleapp.fili.org/v1/dimensions/productRegion):
 
-    GET https://digits3.data.yahoo.com:4443/v1/dimensions/productRegion
+    GET https://sampleapp.fili.org/v1/dimensions/productRegion
 
-Get a [list of possible values for a dimension](https://digits3.data.yahoo.com:4443/v1/dimensions/productRegion/values):
+Get a [list of possible values for a dimension](https://sampleapp.fili.org/v1/dimensions/productRegion/values):
 
-    GET https://digits3.data.yahoo.com:4443/v1/dimensions/productRegion/values
+    GET https://sampleapp.fili.org/v1/dimensions/productRegion/values
 
 Additionally, the values for a dimension have some options for querying them:
 
@@ -74,9 +74,9 @@ Additionally, the values for a dimension have some options for querying them:
 - [Format](#response-format)
 - [Filtering](#filtering) (All filters are supported)
 
-For example, to get the [2nd page of User Countries with U in the description, with 5 entries per page, in JSON format](https://digits3.data.yahoo.com:4443/v1/dimensions/userCountry/values?filters=userCountry|desc-contains[U]&page=2&perPage=5&format=json):
+For example, to get the [2nd page of User Countries with U in the description, with 5 entries per page, in JSON format](https://sampleapp.fili.org/v1/dimensions/userCountry/values?filters=userCountry|desc-contains[U]&page=2&perPage=5&format=json):
 
-    GET https://digits3.data.yahoo.com:4443/v1/dimensions/userCountry/values?filters=userCountry|desc-contains[U]&page=2&perPage=5&format=json
+    GET https://sampleapp.fili.org/v1/dimensions/userCountry/values?filters=userCountry|desc-contains[U]&page=2&perPage=5&format=json
 
 ### Metrics ###
 
@@ -84,13 +84,13 @@ Metrics are the data points, and include things like Page Views, Daily Average T
 available depend on the particular table and time grain, you can discover the available metrics by querying the table
 you are interested in, as well as a metrics collection resource that lists all metrics supported by the system.
 
-Get a [list of all metrics](https://digits3.data.yahoo.com:4443/v1/metrics):
+Get a [list of all metrics](https://sampleapp.fili.org/v1/metrics):
 
-    GET https://digits3.data.yahoo.com:4443/v1/metrics
+    GET https://sampleapp.fili.org/v1/metrics
     
-Get a [specific metric](https://digits3.data.yahoo.com:4443/v1/metrics/timeSpent):
+Get a [specific metric](https://sampleapp.fili.org/v1/metrics/timeSpent):
 
-    GET https://digits3.data.yahoo.com:4443/v1/metrics/timeSpent
+    GET https://sampleapp.fili.org/v1/metrics/timeSpent
 
 ### Tables ###
 
@@ -98,13 +98,13 @@ Tables are the connecting point that tell you what combination of [Metrics](#met
 available, and at what [time grain](#time-grain). For each table, and a specific time grain, there is a set of Metrics
 and Dimensions that are available on that table.
 
-Get a [list of all tables](https://digits3.data.yahoo.com:4443/v1/tables):
+Get a [list of all tables](https://sampleapp.fili.org/v1/tables):
 
-    GET https://digits3.data.yahoo.com:4443/v1/tables
+    GET https://sampleapp.fili.org/v1/tables
 
-Get a [specific table](https://digits3.data.yahoo.com:4443/v1/tables/network/week):
+Get a [specific table](https://sampleapp.fili.org/v1/tables/network/week):
 
-    GET https://digits3.data.yahoo.com:4443/v1/tables/network/week
+    GET https://sampleapp.fili.org/v1/tables/network/week
 
 ### Filters ###
 
@@ -167,8 +167,7 @@ This [basic query](https://sampleapp.fili.org/v1/data/network/week?metrics=pageV
 gives us network-level page views and daily average time spent data for one week. Let's break down the different 
 components of this URL.
 
-- **https\://** - The Fili API is only available over a secure connection, so _HTTPS is required_. _HTTP queries
-    will not work_.
+- **https\://** - .
 - **sampleapp.fili.org** - This is where the Fili API lives.
 - **v1** - The version of the API.
 - **data** - This is the resource we are querying, and is the base for all data reports.
@@ -617,10 +616,6 @@ Usually this means you didn't include proper security authentication information
 #### 403 FORBIDDEN ####
 
 We know who you are, but you can't come in.
-
-This is usually because you're making a request with a headless user that isn't on the whitelist. If you need to access
-the Digit 3 API with a headless user and are getting denied access, shoot us an email and we will happily add your user
-to the list.
 
 #### 404 NOT FOUND ####
 
