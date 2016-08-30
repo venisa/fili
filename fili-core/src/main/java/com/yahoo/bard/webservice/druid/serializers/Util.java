@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonStreamContext;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Utility functions for druid serializers.
@@ -24,24 +25,42 @@ public class Util {
      * @return  an Optional String of physical name
      */
     public static Optional<String> findPhysicalName(Dimension value, JsonGenerator gen) {
-        JsonStreamContext context = gen.getOutputContext();
         String apiName = value.getApiName();
         // Search for physical name
+        return withDruidQuery(gen, druidQuery -> druidQuery.getDataSource().getPhysicalTables().iterator().next().getPhysicalColumnName(apiName)
+        );
+    }
+
+    /**
+     * JSON tree walk to determine if there is a nested query below the current json node or not.
+     *
+     * @param gen  the Json Generator to retrieve the tree to walk on.
+     *
+     * @return  a Boolean where true indicates there are more nested query below this node, false otherwise
+     */
+    public static Boolean hasInnerQuery(JsonGenerator gen) {
+        return withDruidQuery(gen, druidQuery -> druidQuery.getInnerQuery() != null).orElse(false);
+    }
+
+    /**
+     * JSON tree walk to find the druid query context of the current context,
+     * returns the current context if current context is a druid query.
+     *
+     * @param gen  the Json Generator to retrieve the tree to walk on.
+     * @param success  a function that takes an DruidQuery as an argument and return the final desired returned result.
+     *
+     * @return an Optional of DruidQuery if found, Optional.empty otherwise
+     */
+    public static <T> Optional<T> withDruidQuery(JsonGenerator gen, Function<DruidQuery, T> success) {
+        JsonStreamContext context = gen.getOutputContext();
+
         while (context != null) {
             Object parent = context.getCurrentValue();
             if (parent instanceof DruidQuery) {
-                return Optional.of(
-                        ((DruidQuery) parent)
-                                .getDataSource()
-                                .getPhysicalTables()
-                                .iterator()
-                                .next()
-                                .getPhysicalColumnName(apiName)
-                );
+                return Optional.of(success.apply((DruidQuery) parent));
             }
             context = context.getParent();
         }
-        // If we cannot find the physical name, then return empty optional.
         return Optional.empty();
     }
 }
