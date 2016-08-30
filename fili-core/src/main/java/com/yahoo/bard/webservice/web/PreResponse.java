@@ -34,6 +34,17 @@ public class PreResponse {
         return responseContext;
     }
 
+    /**
+     * Method to have new PreResponse for the given ResultSet.
+     *
+     * @param resultSet  ResultSet associated with a response
+     *
+     * @return new instance of PreResponse
+     */
+    public PreResponse withResultSet(ResultSet resultSet) {
+        return new PreResponse(resultSet, getResponseContext());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) { return true; }

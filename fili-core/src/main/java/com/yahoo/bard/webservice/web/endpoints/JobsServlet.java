@@ -12,6 +12,8 @@ import com.yahoo.bard.webservice.config.SystemConfig;
 import com.yahoo.bard.webservice.config.SystemConfigProvider;
 import com.yahoo.bard.webservice.data.HttpResponseChannel;
 import com.yahoo.bard.webservice.data.HttpResponseMaker;
+import com.yahoo.bard.webservice.data.Result;
+import com.yahoo.bard.webservice.data.ResultSet;
 import com.yahoo.bard.webservice.data.dimension.DimensionDictionary;
 import com.yahoo.bard.webservice.jobs.ApiJobStore;
 import com.yahoo.bard.webservice.jobs.BroadcastChannel;
@@ -21,6 +23,7 @@ import com.yahoo.bard.webservice.jobs.ResponseException;
 import com.yahoo.bard.webservice.logging.RequestLog;
 import com.yahoo.bard.webservice.logging.blocks.JobRequest;
 import com.yahoo.bard.webservice.util.AllPagesPagination;
+import com.yahoo.bard.webservice.util.Pagination;
 import com.yahoo.bard.webservice.web.ApiRequest;
 import com.yahoo.bard.webservice.web.JobNotFoundException;
 import com.yahoo.bard.webservice.web.JobsApiRequest;
@@ -399,7 +402,7 @@ public class JobsServlet extends EndpointServlet {
     ) {
         HttpResponseMaker httpResponseMaker = new HttpResponseMaker(objectMappers, dimensionDictionary);
 
-        preResponseObservable.flatMap(this::handlePreResponseWithError)
+        preResponseObservable.flatMap(preResponse -> handlePreResponseWithError(preResponse, apiRequest))
                 .subscribe(
                         new HttpResponseChannel(
                                 asyncResponse,
@@ -415,11 +418,12 @@ public class JobsServlet extends EndpointServlet {
      * return an Observable wrapping the PreResponse as is.
      *
      * @param preResponse  The PreResponse to be inspected
+     * @param jobsApiRequest  JobsApiRequest object with all the associated info with it
      *
      * @return An Observable wrapping the PreResponse or an Observable wrapping a ResponseException
      *
      */
-    protected Observable<PreResponse> handlePreResponseWithError(PreResponse preResponse) {
+    protected Observable<PreResponse> handlePreResponseWithError(PreResponse preResponse, ApiRequest jobsApiRequest) {
         ResponseContext responseContext = preResponse.getResponseContext();
 
         if (responseContext.containsKey(ResponseContextKeys.STATUS.getName())) {
@@ -431,7 +435,15 @@ public class JobsServlet extends EndpointServlet {
             );
             return Observable.error(responseException);
         }
-        return Observable.just(preResponse);
+        Pagination<Result> pages = new AllPagesPagination<>(
+                preResponse.getResultSet(),
+                jobsApiRequest.getPaginationParameters().orElse(jobsApiRequest.getDefaultPagination())
+        );
+
+        PreResponse paginatedPreResponse = preResponse.withResultSet(
+                new ResultSet(pages.getPageOfData(), preResponse.getResultSet().getSchema())
+        );
+        return Observable.just(paginatedPreResponse);
     }
 
     /**
@@ -464,7 +476,7 @@ public class JobsServlet extends EndpointServlet {
 
         LOG.error(throwable.getMessage());
         RequestLog.stopTiming(this);
-        //Incase the job cannot be retrieved from the ApiJobStore or if it cannot be mapped to a Job
+        //In case the job cannot be retrieved from the ApiJobStore or if it cannot be mapped to a Job
         return Response.status(INTERNAL_SERVER_ERROR).entity(throwable.getMessage()).build();
     }
 }
