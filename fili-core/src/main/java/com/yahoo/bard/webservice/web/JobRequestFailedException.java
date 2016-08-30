@@ -3,7 +3,7 @@
 package com.yahoo.bard.webservice.web;
 
 /**
- * Unchecked exception in case request to the jobs endpoint fails.
+ * Unchecked exception in case request to the async endpoint fails.
  */
 public class JobRequestFailedException extends RuntimeException {
 

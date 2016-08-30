@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class JobRequest implements LogInfo {
-    protected final String resource = "jobs";
+    protected final String resource = "async";
     protected final String ticket;
 
     /**
