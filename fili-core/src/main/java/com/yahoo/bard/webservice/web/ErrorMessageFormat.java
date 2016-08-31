@@ -131,6 +131,7 @@ public enum ErrorMessageFormat implements MessageFormatter {
     RESOURCE_RETRIEVAL_FAILURE("Unable to retrieve the resource for given resource name: %s. %s"),
     RESOURCE_STORAGE_FAILURE("Unable to store the resource for resource name %s. %s"),
     RESOURCE_DELETION_FAILURE("Unable to delete the resource for resource name %s. %s"),
+    UNKNOWN_EXCEPTION_MOBSTOR("Unknown error during transaction with mobstor . Additional info %s."),
 
     UNSUPPORTED_LOOKBACKQUERY_OPERATION("LookbackQuery creation failed for the requested metric",
             "withPostAggregations() is not supported by LookbackQuery. Try using withInnerQueryPostAggregations or withLookbackQueryPostAggregations"),
@@ -162,7 +163,11 @@ public enum ErrorMessageFormat implements MessageFormatter {
 
     MISSING_JOB_ID("Bard experienced an internal error. Sorry.", "Missing id for job row %s"),
 
-    INVALID_ASYNC_AFTER( "Invalid 'asyncAfter' parameter: '%s'. 'asyncAfter' must be either 'never' or an integer number of milliseconds.");
+    INVALID_ASYNC_AFTER( "Invalid 'asyncAfter' parameter: '%s'. 'asyncAfter' must be either 'never' or an integer number of milliseconds."),
+
+    FILTER_JOBFIELD_UNDEFINED("Filter JobField '%s' does not exist."),
+
+    JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA("JobField '%s' is not a part of job meta data. The possible fields to filter on are '%s'");
     // CHECKSTYLE:ON
 
     private final String messageFormat;
