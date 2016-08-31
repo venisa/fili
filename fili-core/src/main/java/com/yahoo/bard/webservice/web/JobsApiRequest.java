@@ -2,10 +2,12 @@
 // Licensed under the terms of the Apache license. Please see LICENSE file distributed with this work for terms.
 package com.yahoo.bard.webservice.web;
 
+
 import com.yahoo.bard.webservice.async.jobs.stores.ApiJobStore;
 import com.yahoo.bard.webservice.async.broadcastchannels.BroadcastChannel;
 import com.yahoo.bard.webservice.async.jobs.payloads.JobPayloadBuilder;
 import com.yahoo.bard.webservice.async.jobs.jobrows.JobRow;
+import com.yahoo.bard.webservice.async.jobs.stores.JobRowFilter;
 import com.yahoo.bard.webservice.async.preresponses.stores.PreResponseStore;
 
 import org.slf4j.Logger;
@@ -14,8 +16,12 @@ import org.slf4j.LoggerFactory;
 import rx.Observable;
 import rx.observables.ConnectableObservable;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.UriInfo;
@@ -121,6 +127,46 @@ public class JobsApiRequest extends ApiRequest {
     public Observable<Map<String, String>> getJobViews() {
         return apiJobStore.getAllRows()
                 .map(this::mapJobRowsToJobViews);
+    }
+
+    /**
+     * Return an Observable containing a stream of job views for all the jobs in the ApiJobStore that satisfy the
+     * apiJobStoreFilters. If, for any JobRow, the mapping from JobRow to job view fails, an Observable over
+     * JobRequestFailedException is returned. If the ApiJobStore is empty, we return an empty Observable.
+     *
+     * @param apiJobStoreFilters  A Set containing apiJobStoreFilters which contain all the filter information needed
+     * to filter JobRows
+     *
+     * @return An Observable containing a stream of Maps representing the jobs to be returned to the user
+     */
+    public Observable<Map<String, String>> getFilteredJobViews(Set<JobRowFilter> apiJobStoreFilters) {
+        return apiJobStore.getFilteredRows(apiJobStoreFilters)
+                .map(this::mapJobRowsToJobViews);
+    }
+
+    /**
+     * Given a filter String, generates a Set of ApiJobStoreFilters. This method will throw a BadApiRequestException if
+     * the filter String cannot be parsed into ApiJobStoreFilters successfully.
+     *
+     * @param filterQuery  Expects a URL filterQuery String that may contain multiple filters separated by
+     * comma.  The format of a filter String is :
+     * (JobField name)-(operation)[(value or comma separated values)]?
+     *
+     * @return  A Set of ApiJobStoreFilters
+     */
+    public LinkedHashSet<JobRowFilter> buildJobStoreFilter(@NotNull String filterQuery) {
+        // split on '],' to get list of filters
+        return Arrays.asList(filterQuery.split(COMMA_AFTER_BRACKET_PATTERN)).stream()
+                .map(
+                        filter -> {
+                            try {
+                                return new JobRowFilter(filter);
+                            } catch (BadFilterException e) {
+                                throw new BadApiRequestException(e.getMessage(), e);
+                            }
+                        }
+                )
+                .collect(Collectors.toCollection(LinkedHashSet<JobRowFilter>::new));
     }
 
     /**
