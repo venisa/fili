@@ -55,19 +55,19 @@ public interface ApiJobStore {
     Observable<JobRow> getAllRows();
 
     /**
-     * This method takes a Set of ApiJobStoreFilters, ANDS them by default, and returns a cold observable that emits a
+     * This method takes a Set of JobRowFilters, ANDS them by default, and returns a cold observable that emits a
      * stream of JobRows which satisfy the given filter.
      * <p>
-     * Every field may not be filterable for every implementation of the `ApiJobStore` as the efficiency of filtering is
-     * dependent on the backing store. An IllegalArgumentException is thrown if filtering on any given field is not
-     * supported.
+     * Every field may not be filterable for every implementation of the {@code ApiJobStore} as the efficiency of
+     * filtering is dependent on the backing store. An IllegalArgumentException is thrown if filtering on any given
+     * field is not supported.
      *
-     * @param apiJobStoreFilters  A List of ApiJobStoreFilters where each ApiJobStoreFilter contains the JobField to be
+     * @param jobRowFilters  A List of JobRowFilters where each JobRowFilter contains the JobField to be
      * filtered on, the filter operation and the values to be compared to.
      *
      * @return An Observable that emits a stream of JobRows that satisfy the given filters
      *
      * @throws IllegalArgumentException if filtering on any field is not supported
      */
-    Observable<JobRow> getFilteredRows(Set<ApiJobStoreFilter> apiJobStoreFilters) throws IllegalArgumentException;
+    Observable<JobRow> getFilteredRows(Set<JobRowFilter> jobRowFilters) throws IllegalArgumentException;
 }

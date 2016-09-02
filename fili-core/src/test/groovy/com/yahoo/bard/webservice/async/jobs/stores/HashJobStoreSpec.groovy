@@ -8,7 +8,7 @@ import static com.yahoo.bard.webservice.async.jobs.jobrows.DefaultJobField.USER_
 import com.yahoo.bard.webservice.async.jobs.JobTestUtils
 import com.yahoo.bard.webservice.async.jobs.jobrows.JobRow
 import com.yahoo.bard.webservice.util.ReactiveTestUtils
-
+import com.yahoo.bard.webservice.web.FilterOperation
 
 import rx.observers.TestSubscriber
 import spock.lang.Shared
@@ -28,9 +28,9 @@ class HashJobStoreSpec extends ApiJobStoreSpec {
     @Shared
     JobRow userBarJobRow1
     @Shared
-    ApiJobStoreFilter userIdFilter
+    JobRowFilter userIdFilter
     @Shared
-    ApiJobStoreFilter jobTicketFilter
+    JobRowFilter jobTicketFilter
 
     @Override
     ApiJobStore getStore() {
@@ -47,8 +47,8 @@ class HashJobStoreSpec extends ApiJobStoreSpec {
         hashJobStore.save(userFooJobRow2).subscribe()
         hashJobStore.save(userBarJobRow1).subscribe()
 
-        userIdFilter = new ApiJobStoreFilter(USER_ID, ApiJobStoreFilterOperation.eq, ["Foo"] as Set)
-        jobTicketFilter = new ApiJobStoreFilter(JOB_TICKET, ApiJobStoreFilterOperation.eq, ["1"] as Set)
+        userIdFilter = new JobRowFilter(USER_ID, FilterOperation.eq, ["Foo"] as Set)
+        jobTicketFilter = new JobRowFilter(JOB_TICKET, FilterOperation.eq, ["1"] as Set)
     }
 
     def "The backing map is invoked once per store access regardless of the number of observers subscribed"() {
@@ -94,13 +94,27 @@ class HashJobStoreSpec extends ApiJobStoreSpec {
         JobRow jobRowWithoutUserId = new JobRow(JOB_TICKET, [(JOB_TICKET): "1"])
         hashJobStore.save(jobRowWithoutUserId)
 
-        ApiJobStoreFilter apiJobStoreFilter = new ApiJobStoreFilter(USER_ID, ApiJobStoreFilterOperation.eq, ["Foo"] as Set)
+        JobRowFilter jobRowFilter = new JobRowFilter(USER_ID, FilterOperation.eq, ["Foo"] as Set)
+        TestSubscriber<JobRow> testSubscriber = new TestSubscriber<>()
 
         when:
-        hashJobStore.getFilteredRows([apiJobStoreFilter] as Set)
+        hashJobStore.getFilteredRows([jobRowFilter] as Set).subscribe(testSubscriber)
 
         then:
-        IllegalArgumentException exception = thrown()
-        exception.message == "JobField 'userId' is not a part of job meta data. The possible fields to filter on are '[jobTicket]'"
+        testSubscriber.assertError(IllegalArgumentException.class)
+        testSubscriber.getOnErrorEvents().get(0).getMessage() == "JobField 'userId' is not a part of job meta data. The possible fields to filter on are '[jobTicket]'"
+    }
+
+    def "getFilteredRows throws IllegalArgumentException if an unsupported FilterOperation is used"() {
+        setup:
+        JobRowFilter jobRowFilter = new JobRowFilter(USER_ID, FilterOperation.contains, ["Foo"] as Set)
+        TestSubscriber<JobRow> testSubscriber = new TestSubscriber<>()
+
+        when:
+        hashJobStore.getFilteredRows([jobRowFilter] as Set).subscribe(testSubscriber)
+
+        then:
+        testSubscriber.assertError(IllegalArgumentException.class)
+        testSubscriber.getOnErrorEvents().get(0).getMessage() == "Filter operator 'contains' is invalid."
     }
 }

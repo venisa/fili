@@ -34,7 +34,7 @@ public class NoOpApiJobStore implements ApiJobStore {
     }
 
     @Override
-    public Observable<JobRow> getFilteredRows(Set<ApiJobStoreFilter> apiJobStoreFilter)
+    public Observable<JobRow> getFilteredRows(Set<JobRowFilter> jobRowFilter)
             throws IllegalArgumentException {
                 return Observable.empty();
     }

@@ -2,10 +2,12 @@
 // Licensed under the terms of the Apache license. Please see LICENSE file distributed with this work for terms.
 package com.yahoo.bard.webservice.async.jobs.stores;
 
+import static com.yahoo.bard.webservice.web.ErrorMessageFormat.FILTER_OPERATOR_INVALID;
+import static com.yahoo.bard.webservice.web.ErrorMessageFormat.JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA;
+
 import com.yahoo.bard.webservice.async.jobs.jobrows.JobField;
 import com.yahoo.bard.webservice.async.jobs.jobrows.JobRow;
-
-import static com.yahoo.bard.webservice.web.ErrorMessageFormat.JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA;
+import com.yahoo.bard.webservice.web.FilterOperation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +17,6 @@ import rx.Observable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * An ApiJobStore backed by an in-memory map. This is meant as a stub implementation for
@@ -63,40 +64,55 @@ public class HashJobStore implements ApiJobStore {
     }
 
     @Override
-    public Observable<JobRow> getFilteredRows(Set<ApiJobStoreFilter> apiJobStoreFilters)
+    public Observable<JobRow> getFilteredRows(Set<JobRowFilter> jobRowFilters)
             throws IllegalArgumentException {
-        return Observable.from(
-                store.entrySet().stream()
-                        .filter(entry -> satisfiesFilters(apiJobStoreFilters, entry.getValue()))
-                        .map(entry -> entry.getValue())
-                        .collect(Collectors.toSet())
-        );
+        return getAllRows().filter(jobRow -> satisfiesFilters(jobRowFilters, jobRow));
     }
 
     /**
-     * This method checks if the given JobRow satisfies all the ApiJobStoreFilters and returns true if it does.
+     * This method checks if the given JobRow satisfies all the JobRowFilters and returns true if it does.
      * If a JobField in any of the filters is not a part the JobRow, this method throws a IllegalArgumentException.
      *
-     * @param apiJobStoreFilters  A Set of ApiJobStoreFilters specifying the different conditions to be satisfied
+     * @param jobRowFilters  A Set of JobRowFilters specifying the different conditions to be satisfied
      * @param jobRow  The JobRow which needs to be inspected
      *
      * @return true if the JobRow satisfies all the filters, false otherwise
      *
      * @throws IllegalArgumentException if a JobField in any of the filters is not a part the JobRow
      */
-    private boolean satisfiesFilters(Set<ApiJobStoreFilter> apiJobStoreFilters, JobRow jobRow)
+    private boolean satisfiesFilters(Set<JobRowFilter> jobRowFilters, JobRow jobRow)
             throws IllegalArgumentException {
-        for (ApiJobStoreFilter filter : apiJobStoreFilters) {
-            JobField jobField = filter.getJobField();
-            if (!jobRow.containsKey(jobField)) {
-                Set<JobField> jobFields = jobRow.keySet();
-                LOG.debug(JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA.logFormat(jobField, jobFields));
-                throw new IllegalArgumentException(JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA.format(jobField, jobFields));
-            }
+        return jobRowFilters.stream().allMatch(filter -> satisfiesFilter(jobRow, filter));
+    }
 
-            if (!filter.getValues().contains(jobRow.get(jobField))) {
-                return false;
-            }
+    /**
+     * This method checks if the given JobRow satisfies the given JobRowFilter and returnd true if it does.
+     * If a JobField in the filter is not a part the JobRow, this method throws a IllegalArgumentException.
+     *
+     * @param jobRow  The JobRow which needs to be inspected
+     * @param jobRowFilter  A JobRowFilter specifying the filter condition
+     *
+     * @return true if the JobRow satisfies the filter, false otherwise
+     *
+     * @throws IllegalArgumentException if a JobField in the filter is not a part the JobRow
+     */
+    private boolean satisfiesFilter(JobRow jobRow, JobRowFilter jobRowFilter) throws IllegalArgumentException {
+        JobField filterJobField = jobRowFilter.getJobField();
+        FilterOperation filterOperation = jobRowFilter.getOperation();
+        if (!filterOperation.equals(FilterOperation.eq)) {
+            LOG.debug(FILTER_OPERATOR_INVALID.logFormat(filterOperation));
+            throw new IllegalArgumentException(FILTER_OPERATOR_INVALID.format(filterOperation));
+        }
+        if (!jobRow.containsKey(filterJobField)) {
+            Set<JobField> actualJobFields = jobRow.keySet();
+            LOG.debug(JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA.logFormat(filterJobField, actualJobFields));
+            throw new IllegalArgumentException(
+                    JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA.format(filterJobField, actualJobFields)
+            );
+        }
+
+        if (!jobRowFilter.getValues().contains(jobRow.get(filterJobField))) {
+            return false;
         }
         return true;
     }

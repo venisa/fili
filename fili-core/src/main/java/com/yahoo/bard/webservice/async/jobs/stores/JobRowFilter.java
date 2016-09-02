@@ -11,10 +11,12 @@ import com.yahoo.bard.webservice.async.jobs.jobrows.DefaultJobField;
 import com.yahoo.bard.webservice.async.jobs.jobrows.JobField;
 import com.yahoo.bard.webservice.util.FilterTokenizer;
 import com.yahoo.bard.webservice.web.BadFilterException;
+import com.yahoo.bard.webservice.web.FilterOperation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -26,11 +28,11 @@ import javax.validation.constraints.NotNull;
 /**
  * Class containing filter information to filter JobRows in ApiJobStore.
  */
-public class ApiJobStoreFilter {
-    private static final Logger LOG = LoggerFactory.getLogger(ApiJobStoreFilter.class);
+public class JobRowFilter {
+    private static final Logger LOG = LoggerFactory.getLogger(JobRowFilter.class);
 
     private final JobField jobField;
-    private final ApiJobStoreFilterOperation operation;
+    private final FilterOperation operation;
     private final Set<String> values;
 
     /*  url filter query pattern:  (JobField name)-(operation)[(value or comma separated numeric values)]?
@@ -44,7 +46,7 @@ public class ApiJobStoreFilter {
     private static final Pattern QUERY_PATTERN = Pattern.compile("([^\\|]+)-([^\\[]+)\\[([^\\]]+)\\]?");
 
     /**
-     * Parses the URL ApiJobStore filter query and generates the ApiJobStoreFilter object.
+     * Parses the URL ApiJobStore filter query and generates the JobRowFilter object.
      *
      * @param filterQuery  Expects a URL ApiJobStore filter query String in the format:
      * <p>
@@ -53,7 +55,7 @@ public class ApiJobStoreFilter {
      * @throws BadFilterException when filter pattern is not matched or when any of its properties are not
      * valid.
      */
-    public ApiJobStoreFilter(@NotNull String filterQuery) throws BadFilterException {
+    public JobRowFilter(@NotNull String filterQuery) throws BadFilterException {
         LOG.trace("filterQuery: {}", filterQuery);
 
         Matcher tokenizedQuery = QUERY_PATTERN.matcher(filterQuery);
@@ -70,13 +72,13 @@ public class ApiJobStoreFilter {
     }
 
     /**
-     * Constructor for an ApiJobStoreFilter object whose data has already been parsed.
+     * Constructor for an JobRowFilter object whose data has already been parsed.
      *
      * @param jobField  The JobField to perform the filtering on
      * @param operation  The operation to perform (eg: eq)
      * @param values  A Set of Strings to compare the JobField's value to.
      */
-    private ApiJobStoreFilter(JobField jobField, ApiJobStoreFilterOperation operation, Set<String> values) {
+    private JobRowFilter(JobField jobField, FilterOperation operation, Set<String> values) {
         this.jobField = jobField;
         this.operation = operation;
         this.values = values;
@@ -86,7 +88,7 @@ public class ApiJobStoreFilter {
         return jobField;
     }
 
-    public ApiJobStoreFilterOperation getOperation() {
+    public FilterOperation getOperation() {
         return operation;
     }
 
@@ -95,72 +97,73 @@ public class ApiJobStoreFilter {
     }
 
     /**
-     * Construct an ApiJobStoreFilter object using the same ApiJobStoreFilterOperation and values as the object on
+     * Construct an JobRowFilter object using the same FilterOperation and values as the object on
      * which this method is called and using the supplied JobField.
      *
      * @param jobField  The JobField to perform the filtering on
      *
-     * @return An instance of ApiJobStoreFilter created using the supplied JobField
+     * @return An instance of JobRowFilter created using the supplied JobField
      */
-    public ApiJobStoreFilter withJobField(JobField jobField) {
-        return new ApiJobStoreFilter(jobField, operation, values);
+    public JobRowFilter withJobField(JobField jobField) {
+        return new JobRowFilter(jobField, operation, values);
     }
 
     /**
-     * Construct an ApiJobStoreFilter object using the same JobField and values as the object on
-     * which this method is called and using the supplied ApiJobStoreFilterOperation.
+     * Construct an JobRowFilter object using the same JobField and values as the object on
+     * which this method is called and using the supplied FilterOperation.
      *
      * @param operation  The operation to perform (eg: eq)
      *
-     * @return An instance of ApiJobStoreFilter created using the supplied ApiJobStoreFilterOperation
+     * @return An instance of JobRowFilter created using the supplied FilterOperation
      */
-    public ApiJobStoreFilter withOperation(ApiJobStoreFilterOperation operation) {
-        return new ApiJobStoreFilter(jobField, operation, values);
+    public JobRowFilter withOperation(FilterOperation operation) {
+        return new JobRowFilter(jobField, operation, values);
     }
 
     /**
-     * Construct an ApiJobStoreFilter object using the same JobField and ApiJobStoreFilterOperation as the object on
+     * Construct an JobRowFilter object using the same JobField and FilterOperation as the object on
      * which this method is called and using the supplied values.
      *
      * @param values  A Set of Strings to compare the JobField's value to
      *
-     * @return  An instance of ApiJobStoreFilter created using the supplied values
+     * @return  An instance of JobRowFilter created using the supplied values
      */
-    public ApiJobStoreFilter withValues(Set<String> values) {
-        return new ApiJobStoreFilter(jobField, operation, values);
+    public JobRowFilter withValues(Set<String> values) {
+        return new JobRowFilter(jobField, operation, values);
     }
 
     /**
      * Extracts the JobField to be examined from the tokenizedQuery.
      *
-     * @param tokenizedQuery  The parsed ApiJobStore filter tokenizedQuery.
+     * @param tokenizedQuery  The tokenized filter expression.
      *
      * @return  The JobField to be examined
      * @throws BadFilterException is the JobField does not exist
      */
     private JobField extractJobField(Matcher tokenizedQuery) throws BadFilterException {
         String fieldName = tokenizedQuery.group(1);
-        for (JobField field : DefaultJobField.values()) {
-            if (field.getName().equals(fieldName)) {
-                return field;
-            }
-        }
-        LOG.debug(FILTER_JOBFIELD_UNDEFINED.logFormat(fieldName));
-        throw new BadFilterException(FILTER_JOBFIELD_UNDEFINED.format(fieldName));
+
+        return Arrays.stream(DefaultJobField.values())
+                .filter(field -> field.getName().equals(fieldName))
+                .findFirst()
+                .orElseThrow(() -> {
+                            LOG.debug(FILTER_JOBFIELD_UNDEFINED.logFormat(fieldName));
+                            return new BadFilterException(FILTER_JOBFIELD_UNDEFINED.format(fieldName));
+                });
     }
 
     /**
      * Extracts the operation to be performed by the ApiJobStore filter query.
      *
-     * @param tokenizedQuery  The parsed ApiJobStore filter tokenizedQuery.
+     * @param tokenizedQuery  The tokenized filter expression..
      *
      * @return The operation to be performed by the ApiJobStore filter query.
      * @throws BadFilterException if the operation does not exist
      */
-    private ApiJobStoreFilterOperation extractOperation(Matcher tokenizedQuery) throws BadFilterException {
+    private FilterOperation extractOperation(Matcher tokenizedQuery) throws BadFilterException {
         String operationName = tokenizedQuery.group(2);
         try {
-            return ApiJobStoreFilterOperation.valueOf(operationName);
+            return FilterOperation.valueOf(operationName);
         } catch (IllegalArgumentException ignored) {
             LOG.debug(FILTER_OPERATOR_INVALID.logFormat(operationName));
             throw new BadFilterException(FILTER_OPERATOR_INVALID.format(operationName));
@@ -168,12 +171,12 @@ public class ApiJobStoreFilter {
     }
 
     /**
-     * Extracts the values to be used in the ApiJobStoreFilter query from the query.
+     * Extracts the values to be used in the JobRowFilter query from the query.
      *
-     * @param tokenizedQuery  The parsed ApiJobStore filter tokenizedQuery.
+     * @param tokenizedQuery  The tokenized filter expression..
      * @param filterQuery  The raw query. Used for logging.
      *
-     * @return The set of values to be used in the ApiJobStoreFilter query.
+     * @return The set of values to be used in the JobRowFilter query.
      * @throws BadFilterException If the fragment of the query that specifies the values is malformed.
      */
     private Set<String> extractValues(Matcher tokenizedQuery, String filterQuery) throws BadFilterException {
@@ -196,14 +199,14 @@ public class ApiJobStoreFilter {
     @Override
     public boolean equals(final Object o) {
         if (this == o) { return true; }
-        if (!(o instanceof ApiJobStoreFilter)) { return false; }
+        if (!(o instanceof JobRowFilter)) { return false; }
 
-        ApiJobStoreFilter apiJobStoreFilter = (ApiJobStoreFilter) o;
+        JobRowFilter jobRowFilter = (JobRowFilter) o;
 
         return
-                Objects.equals(jobField, apiJobStoreFilter.jobField) &&
-                        Objects.equals(operation, apiJobStoreFilter.operation) &&
-                        Objects.equals(values, apiJobStoreFilter.values);
+                Objects.equals(jobField, jobRowFilter.jobField) &&
+                        Objects.equals(operation, jobRowFilter.operation) &&
+                        Objects.equals(values, jobRowFilter.values);
     }
 
     @Override
