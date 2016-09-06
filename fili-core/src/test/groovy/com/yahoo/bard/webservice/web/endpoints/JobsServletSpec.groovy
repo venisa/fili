@@ -181,6 +181,14 @@ class JobsServletSpec extends Specification {
         GroovyTestUtils.compareJson(result, expectedResponse, JsonSortStrategy.SORT_BOTH)
     }
 
+    def "jobs endpoint returns an empty list when none of the JobRows satisfy the filter"() {
+        when: "We send a request to the /jobs endpoint with a valid filters parameter"
+        String result = makeRequest("/jobs", [filters : ["userId-eq[pikachu]"]])
+
+        then: "We only get the job payload that satisfies the filter"
+        GroovyTestUtils.compareJson(result, "{\"jobs\":[]}", JsonSortStrategy.SORT_BOTH)
+    }
+
     String makeRequest(String target) {
         makeRequest(target, [:])
     }
