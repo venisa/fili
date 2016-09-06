@@ -101,8 +101,6 @@ public class HashJobStore implements ApiJobStore {
         FilterOperation filterOperation = jobRowFilter.getOperation();
         Set<String> filterValues = jobRowFilter.getValues();
 
-        String actualValue = jobRow.get(filterJobField);
-
         if (!jobRow.containsKey(filterJobField)) {
             Set<JobField> actualJobFields = jobRow.keySet();
             LOG.debug(JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA.logFormat(filterJobField, actualJobFields));
@@ -111,6 +109,8 @@ public class HashJobStore implements ApiJobStore {
             );
         }
 
+        String actualValue = jobRow.get(filterJobField);
+
         switch (filterOperation) {
             case notin:
                 return !filterValues.contains(actualValue);
@@ -118,7 +118,7 @@ public class HashJobStore implements ApiJobStore {
                 return filterValues.stream().anyMatch(filterValue -> actualValue.startsWith(filterValue));
             case contains :
                 return filterValues.stream().anyMatch(filterValue -> actualValue.contains(filterValue));
-            case in:
+            case in: // the fall-through is intentional because in is a synonym for eq
             case eq:
                 return filterValues.contains(actualValue);
             default:
