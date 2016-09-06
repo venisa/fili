@@ -25,9 +25,14 @@ class JobRowFilterSpec extends Specification {
         jobRowFilter.values == expected as Set
 
         where:
-        jobField  | op   | values           | expected
-        'userId'  | 'eq' | '[foo,bar,baz]'  | ['foo', 'bar', 'baz']
-        'userId'  | 'eq' | '[foo]'          | ['foo']
+        jobField  | op           | values           | expected
+        'userId'  | 'eq'         | '[foo,bar,baz]'  | ['foo', 'bar', 'baz']
+        'userId'  | 'eq'         | '[foo]'          | ['foo']
+        'userId'  | 'in'         | '[foo,bar,baz]'  | ['foo', 'bar', 'baz']
+        'userId'  | 'notin'      | '[foo]'          | ['foo']
+        'userId'  | 'startswith' | '[fo]'           | ['fo']
+        'userId'  | 'contains'   | '[oo]'           | ['oo']
+
     }
 
     @Unroll
