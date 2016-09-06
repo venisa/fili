@@ -142,6 +142,7 @@ public class JobsServlet extends EndpointServlet {
                     null, //asyncAfter is null so it behaves like a synchronous request
                     perPage,
                     page,
+                    filters,
                     uriInfo,
                     jobPayloadBuilder,
                     apiJobStore,
@@ -165,15 +166,7 @@ public class JobsServlet extends EndpointServlet {
                                     )
                     );
 
-            Observable<Map<String, String>> jobViews;
-
-            if (filters == null || "".equals(filters)) {
-                jobViews = apiRequest.getJobViews();
-            } else {
-                jobViews = apiRequest.getFilteredJobViews(apiRequest.buildJobStoreFilter(filters));
-            }
-
-            jobViews.toList()
+            apiRequest.getJobViews().toList()
                     .map(jobs -> jobsApiRequest.getPage(paginationFactory.apply(jobs)))
                     .map(result -> formatResponse(jobsApiRequest, result, "jobs", null))
                     .defaultIfEmpty(getResponse("{}"))
@@ -221,6 +214,7 @@ public class JobsServlet extends EndpointServlet {
                     null,
                     "",
                     "",
+                    null, //filter string is null
                     uriInfo,
                     jobPayloadBuilder,
                     apiJobStore,
@@ -280,6 +274,7 @@ public class JobsServlet extends EndpointServlet {
                     asyncAfter,
                     perPage,
                     page,
+                    null, // filter string is null
                     uriInfo,
                     jobPayloadBuilder,
                     apiJobStore,

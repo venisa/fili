@@ -179,7 +179,7 @@ class JobsServletSpec extends Specification {
 
         then: "We only get the job payload that satisfies the filter"
         GroovyTestUtils.compareJson(result, expectedResponse, JsonSortStrategy.SORT_BOTH)
-        }
+    }
 
     String makeRequest(String target) {
         makeRequest(target, [:])

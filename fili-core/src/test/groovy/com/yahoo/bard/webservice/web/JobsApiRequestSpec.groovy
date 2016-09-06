@@ -79,6 +79,7 @@ class JobsApiRequestSpec extends Specification {
                 null,
                 "",
                 "",
+                null,
                 uriInfo,
                 jobPayloadBuilder,
                 apiJobStore,
@@ -158,6 +159,7 @@ class JobsApiRequestSpec extends Specification {
                 "0",
                 "",
                 "",
+                null,
                 uriInfo,
                 jobPayloadBuilder,
                 apiJobStore,
@@ -217,7 +219,7 @@ class JobsApiRequestSpec extends Specification {
 
     def "buildJobStoreFilter correctly parses multiple filter query"() {
         setup:
-        String filterQuery = "userId-eq[foo],status-eq[successful]"
+        String filterQuery = "userId-eq[foo],status-eq[success]"
 
         when:
         Set<JobRowFilter> filters = defaultJobsApiRequest.buildJobStoreFilter(filterQuery)
@@ -233,7 +235,7 @@ class JobsApiRequestSpec extends Specification {
         JobRowFilter filter2 = filters[1]
         filter2.jobField?.name == "status"
         filter2.operation == FilterOperation.valueOf("eq")
-        filter2.values == ["successful"] as Set
+        filter2.values == ["success"] as Set
     }
 
     def "buildJobStoreFilter throws BadApiRequestException for bad filter query"() {
@@ -251,7 +253,6 @@ class JobsApiRequestSpec extends Specification {
 
     def "getFilteredJobViews returns JobRows that satisfy the given filter"() {
         setup:
-        JobRowFilter filter = new JobRowFilter(DefaultJobField.USER_ID, FilterOperation.eq, ["Number 1", "Number 2"] as Set)
         TestSubscriber<JobRow> testSubscriber = new TestSubscriber<>()
 
         HashJobStore apiJobStore = new HashJobStore()
@@ -268,6 +269,7 @@ class JobsApiRequestSpec extends Specification {
                 null,
                 "",
                 "",
+                "userId-eq[Number 1,Number 2]",
                 uriInfo,
                 jobPayloadBuilder,
                 apiJobStore,
@@ -298,7 +300,7 @@ class JobsApiRequestSpec extends Specification {
         ]
 
         when:
-        apiRequest.getFilteredJobViews([filter] as Set).subscribe(testSubscriber)
+        apiRequest.getJobViews().subscribe(testSubscriber)
 
         then:
         testSubscriber.assertReceivedOnNext([jobPayload1, jobPayload2])
