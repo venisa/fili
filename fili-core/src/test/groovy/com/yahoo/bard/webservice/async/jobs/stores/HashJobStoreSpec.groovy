@@ -55,7 +55,7 @@ class HashJobStoreSpec extends ApiJobStoreSpec {
         hashJobStore.save(userFooJobRow2).subscribe()
         hashJobStore.save(userBarJobRow1).subscribe()
 
-        userIdFilter = new JobRowFilter(USER_ID, FilterOperation.eq, ["Foo"] as Set)
+        userIdFilter = new JobRowFilter(USER_ID, FilterOperation.startswith, ["Fo"] as Set)
         jobTicketFilter = new JobRowFilter(JOB_TICKET, FilterOperation.eq, ["1"] as Set)
 
         notInFilter = new JobRowFilter(USER_ID, FilterOperation.notin, ["Foo"] as Set)
