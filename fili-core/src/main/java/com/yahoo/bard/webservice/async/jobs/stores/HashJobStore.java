@@ -86,8 +86,8 @@ public class HashJobStore implements ApiJobStore {
     }
 
     /**
-     * This method checks if the given JobRow satisfies the given JobRowFilter and returnd true if it does.
-     * If a JobField in the filter is not a part the JobRow, this method throws a IllegalArgumentException.
+     * This method checks if the given JobRow satisfies the given JobRowFilter and returns true if it does.
+     * If a JobField in the filter is not a part the JobRow, this method throws an IllegalArgumentException.
      *
      * @param jobRow  The JobRow which needs to be inspected
      * @param jobRowFilter  A JobRowFilter specifying the filter condition
@@ -99,10 +99,10 @@ public class HashJobStore implements ApiJobStore {
     private boolean satisfiesFilter(JobRow jobRow, JobRowFilter jobRowFilter) throws IllegalArgumentException {
         JobField filterJobField = jobRowFilter.getJobField();
         FilterOperation filterOperation = jobRowFilter.getOperation();
-        if (!filterOperation.equals(FilterOperation.eq)) {
-            LOG.debug(FILTER_OPERATOR_INVALID.logFormat(filterOperation));
-            throw new IllegalArgumentException(FILTER_OPERATOR_INVALID.format(filterOperation));
-        }
+        Set<String> filterValues = jobRowFilter.getValues();
+
+        String actualValue = jobRow.get(filterJobField);
+
         if (!jobRow.containsKey(filterJobField)) {
             Set<JobField> actualJobFields = jobRow.keySet();
             LOG.debug(JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA.logFormat(filterJobField, actualJobFields));
@@ -111,9 +111,20 @@ public class HashJobStore implements ApiJobStore {
             );
         }
 
-        if (!jobRowFilter.getValues().contains(jobRow.get(filterJobField))) {
-            return false;
+        switch (filterOperation) {
+            case notin:
+                return !filterValues.contains(actualValue);
+            case startswith:
+                return filterValues.stream().anyMatch(filterValue -> actualValue.startsWith(filterValue));
+            case contains :
+                return filterValues.stream().anyMatch(filterValue -> actualValue.contains(filterValue));
+            case in:
+            case eq:
+                return filterValues.contains(actualValue);
+            default:
+                LOG.debug(FILTER_OPERATOR_INVALID.logFormat(filterOperation));
+                throw new IllegalArgumentException(FILTER_OPERATOR_INVALID.format(filterOperation));
+
         }
-        return true;
     }
 }

@@ -31,6 +31,14 @@ class HashJobStoreSpec extends ApiJobStoreSpec {
     JobRowFilter userIdFilter
     @Shared
     JobRowFilter jobTicketFilter
+    @Shared
+    JobRowFilter notInFilter
+    @Shared
+    JobRowFilter inFilter
+    @Shared
+    JobRowFilter startsWithFilter
+    @Shared
+    JobRowFilter containsFilter
 
     @Override
     ApiJobStore getStore() {
@@ -49,6 +57,12 @@ class HashJobStoreSpec extends ApiJobStoreSpec {
 
         userIdFilter = new JobRowFilter(USER_ID, FilterOperation.eq, ["Foo"] as Set)
         jobTicketFilter = new JobRowFilter(JOB_TICKET, FilterOperation.eq, ["1"] as Set)
+
+        notInFilter = new JobRowFilter(USER_ID, FilterOperation.notin, ["Foo"] as Set)
+        inFilter = new JobRowFilter(USER_ID, FilterOperation.in, ["Foo"] as Set)
+        startsWithFilter = new JobRowFilter(USER_ID, FilterOperation.startswith, ["F"] as Set)
+        containsFilter = new JobRowFilter(USER_ID, FilterOperation.contains, ["oo"] as Set)
+
     }
 
     def "The backing map is invoked once per store access regardless of the number of observers subscribed"() {
@@ -86,6 +100,10 @@ class HashJobStoreSpec extends ApiJobStoreSpec {
         filters                          | jobRows
         [userIdFilter]                   | [userFooJobRow1, userFooJobRow2]
         [userIdFilter, jobTicketFilter]  | [userFooJobRow1]
+        [notInFilter]                    | [userBarJobRow1]
+        [inFilter]                       | [userFooJobRow1, userFooJobRow2]
+        [startsWithFilter]               | [userFooJobRow1, userFooJobRow2]
+        [containsFilter]                 | [userFooJobRow1, userFooJobRow2]
     }
 
     def "getFilteredRows throws IllegalArgumentException if we try to filter on a field not present in the JobRow"() {
@@ -103,18 +121,5 @@ class HashJobStoreSpec extends ApiJobStoreSpec {
         then:
         testSubscriber.assertError(IllegalArgumentException.class)
         testSubscriber.getOnErrorEvents().get(0).getMessage() == "JobField 'userId' is not a part of job meta data. The possible fields to filter on are '[jobTicket]'"
-    }
-
-    def "getFilteredRows throws IllegalArgumentException if an unsupported FilterOperation is used"() {
-        setup:
-        JobRowFilter jobRowFilter = new JobRowFilter(USER_ID, FilterOperation.contains, ["Foo"] as Set)
-        TestSubscriber<JobRow> testSubscriber = new TestSubscriber<>()
-
-        when:
-        hashJobStore.getFilteredRows([jobRowFilter] as Set).subscribe(testSubscriber)
-
-        then:
-        testSubscriber.assertError(IllegalArgumentException.class)
-        testSubscriber.getOnErrorEvents().get(0).getMessage() == "Filter operator 'contains' is invalid."
     }
 }
