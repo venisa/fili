@@ -64,14 +64,13 @@ public class HashJobStore implements ApiJobStore {
     }
 
     @Override
-    public Observable<JobRow> getFilteredRows(Set<JobRowFilter> jobRowFilters)
-            throws IllegalArgumentException {
+    public Observable<JobRow> getFilteredRows(Set<JobRowFilter> jobRowFilters) throws IllegalArgumentException {
         return getAllRows().filter(jobRow -> satisfiesFilters(jobRowFilters, jobRow));
     }
 
     /**
      * This method checks if the given JobRow satisfies all the JobRowFilters and returns true if it does.
-     * If a JobField in any of the filters is not a part the JobRow, this method throws a IllegalArgumentException.
+     * If a JobField in any of the filters is not a part of the JobRow, this method throws an IllegalArgumentException.
      *
      * @param jobRowFilters  A Set of JobRowFilters specifying the different conditions to be satisfied
      * @param jobRow  The JobRow which needs to be inspected
@@ -80,8 +79,7 @@ public class HashJobStore implements ApiJobStore {
      *
      * @throws IllegalArgumentException if a JobField in any of the filters is not a part the JobRow
      */
-    private boolean satisfiesFilters(Set<JobRowFilter> jobRowFilters, JobRow jobRow)
-            throws IllegalArgumentException {
+    private boolean satisfiesFilters(Set<JobRowFilter> jobRowFilters, JobRow jobRow) throws IllegalArgumentException {
         return jobRowFilters.stream().allMatch(filter -> satisfiesFilter(jobRow, filter));
     }
 
@@ -115,16 +113,15 @@ public class HashJobStore implements ApiJobStore {
             case notin:
                 return !filterValues.contains(actualValue);
             case startswith:
-                return filterValues.stream().anyMatch(filterValue -> actualValue.startsWith(filterValue));
+                return filterValues.stream().anyMatch(actualValue::startsWith);
             case contains :
-                return filterValues.stream().anyMatch(filterValue -> actualValue.contains(filterValue));
+                return filterValues.stream().anyMatch(actualValue::contains);
             case in: // the fall-through is intentional because in is a synonym for eq
             case eq:
                 return filterValues.contains(actualValue);
             default:
                 LOG.debug(FILTER_OPERATOR_INVALID.logFormat(filterOperation));
                 throw new IllegalArgumentException(FILTER_OPERATOR_INVALID.format(filterOperation));
-
         }
     }
 }

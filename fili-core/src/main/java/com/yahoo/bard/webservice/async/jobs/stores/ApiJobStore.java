@@ -62,7 +62,7 @@ public interface ApiJobStore {
      * filtering is dependent on the backing store. An IllegalArgumentException is thrown if filtering on any given
      * field is not supported.
      *
-     * @param jobRowFilters  A List of JobRowFilters where each JobRowFilter contains the JobField to be
+     * @param jobRowFilters  A Set of JobRowFilters where each JobRowFilter contains the JobField to be
      * filtered on, the filter operation and the values to be compared to.
      *
      * @return An Observable that emits a stream of JobRows that satisfy the given filters
