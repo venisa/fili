@@ -120,6 +120,6 @@ class HashJobStoreSpec extends ApiJobStoreSpec {
 
         then:
         testSubscriber.assertError(IllegalArgumentException.class)
-        testSubscriber.getOnErrorEvents().get(0).getMessage() == "JobField 'userId' is not a part of job meta data. The possible fields to filter on are '[jobTicket]'"
+        testSubscriber.getOnErrorEvents().get(0).getMessage() == "Filter field 'userId' does not exist. The possible fields to filter on are '[jobTicket]'"
     }
 }

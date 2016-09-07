@@ -3,7 +3,7 @@
 package com.yahoo.bard.webservice.async.jobs.stores;
 
 import static com.yahoo.bard.webservice.web.ErrorMessageFormat.FILTER_OPERATOR_INVALID;
-import static com.yahoo.bard.webservice.web.ErrorMessageFormat.JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA;
+import static com.yahoo.bard.webservice.web.ErrorMessageFormat.FILTER_JOBFIELD_UNDEFINED;
 
 import com.yahoo.bard.webservice.async.jobs.jobrows.JobField;
 import com.yahoo.bard.webservice.async.jobs.jobrows.JobRow;
@@ -101,9 +101,9 @@ public class HashJobStore implements ApiJobStore {
 
         if (!jobRow.containsKey(filterJobField)) {
             Set<JobField> actualJobFields = jobRow.keySet();
-            LOG.debug(JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA.logFormat(filterJobField, actualJobFields));
+            LOG.debug(FILTER_JOBFIELD_UNDEFINED.logFormat(filterJobField, actualJobFields));
             throw new IllegalArgumentException(
-                    JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA.format(filterJobField, actualJobFields)
+                    FILTER_JOBFIELD_UNDEFINED.format(filterJobField, actualJobFields)
             );
         }
 

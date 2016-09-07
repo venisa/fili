@@ -147,8 +147,10 @@ public class JobRowFilter {
                 .filter(field -> field.getName().equals(fieldName))
                 .findFirst()
                 .orElseThrow(() -> {
-                            LOG.debug(FILTER_JOBFIELD_UNDEFINED.logFormat(fieldName));
-                            return new BadFilterException(FILTER_JOBFIELD_UNDEFINED.format(fieldName));
+                            LOG.debug(FILTER_JOBFIELD_UNDEFINED.logFormat(fieldName, DefaultJobField.values()));
+                            return new BadFilterException(FILTER_JOBFIELD_UNDEFINED.format(
+                                    fieldName, DefaultJobField.values()
+                            ));
                 });
     }
 

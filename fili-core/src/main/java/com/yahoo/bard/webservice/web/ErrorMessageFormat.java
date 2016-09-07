@@ -164,9 +164,7 @@ public enum ErrorMessageFormat implements MessageFormatter {
 
     INVALID_ASYNC_AFTER( "Invalid 'asyncAfter' parameter: '%s'. 'asyncAfter' must be either 'never' or an integer number of milliseconds."),
 
-    FILTER_JOBFIELD_UNDEFINED("Filter JobField '%s' does not exist."),
-
-    JOBFIELD_NOT_PRESENT_IN_JOB_META_DATA("JobField '%s' is not a part of job meta data. The possible fields to filter on are '%s'")
+    FILTER_JOBFIELD_UNDEFINED("Filter field '%s' does not exist. The possible fields to filter on are '%s'"),
     ;
     // CHECKSTYLE:ON
 
