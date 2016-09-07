@@ -155,7 +155,7 @@ public class JobRowFilter {
     /**
      * Extracts the operation to be performed by the ApiJobStore filter query.
      *
-     * @param tokenizedQuery  The tokenized filter expression..
+     * @param tokenizedQuery  The tokenized filter expression.
      *
      * @return The operation to be performed by the ApiJobStore filter query.
      * @throws BadFilterException if the operation does not exist

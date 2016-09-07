@@ -58,7 +58,7 @@ public interface ApiJobStore {
      * This method takes a Set of JobRowFilters, ANDS them by default, and returns a cold observable that emits a
      * stream of JobRows which satisfy the given filter.
      * <p>
-     * Every field may not be filterable for every implementation of the {@code ApiJobStore} as the efficiency of
+     * Any of the fields may be not filterable for every implementation of the {@code ApiJobStore} as the efficiency of
      * filtering is dependent on the backing store. An IllegalArgumentException is thrown if filtering on any given
      * field is not supported.
      *
