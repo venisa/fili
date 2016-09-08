@@ -186,7 +186,7 @@ class JobsServletSpec extends Specification {
         String result = makeRequest("/jobs", [filters : ["userId-eq[pikachu]"]])
 
         then: "We only get the job payload that satisfies the filter"
-        GroovyTestUtils.compareJson(result, "{\"jobs\":[]}", JsonSortStrategy.SORT_BOTH)
+        GroovyTestUtils.compareJson(result, '{"jobs":[]}', JsonSortStrategy.SORT_BOTH)
     }
 
     String makeRequest(String target) {

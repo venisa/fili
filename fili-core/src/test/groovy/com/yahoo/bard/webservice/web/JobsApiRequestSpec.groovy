@@ -18,7 +18,6 @@ import com.yahoo.bard.webservice.async.preresponses.stores.PreResponseStore
 import com.yahoo.bard.webservice.async.preresponses.stores.PreResponseTestingUtils
 import com.yahoo.bard.webservice.async.broadcastchannels.SimpleBroadcastChannel
 
-
 import rx.Observable
 import rx.observers.TestSubscriber
 import rx.subjects.PublishSubject;
